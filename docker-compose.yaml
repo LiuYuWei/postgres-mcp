@@ -1,0 +1,25 @@
+services:
+  postgres-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: postgres-mcp
+    environment:
+      - DATABASE_URI=${DATABASE_URI}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - POSTGRES_MCP_INCLUDE_LANGFUSE_TRACE=${POSTGRES_MCP_INCLUDE_LANGFUSE_TRACE:-true}
+    command:
+      - postgres-mcp
+      - --access-mode=${ACCESS_MODE:-unrestricted}
+      - --transport=streamable_http
+      - --streamable_http-host=0.0.0.0
+      - --streamable_http-port=8000
+    ports:
+      - "8000:8000"
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
