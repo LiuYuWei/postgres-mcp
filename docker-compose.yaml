@@ -17,8 +17,17 @@ services:
     ports:
       - "8000:8000"
     restart: always
+    labels:
+      - "traefik.enable=true"
+      # 關鍵：停用所有緩衝，這對 Streamable HTTP / SSE 至關重要
+      - "traefik.http.middlewares.mcp-no-buffering.buffering.maxRequestBodyBytes=0"
+      - "traefik.http.middlewares.mcp-no-buffering.buffering.maxResponseBodyBytes=0"
+      - "traefik.http.middlewares.mcp-no-buffering.buffering.memRequestBodyBytes=0"
+      - "traefik.http.middlewares.mcp-no-buffering.buffering.memResponseBodyBytes=0"
+      # 應用 middleware
+      - "traefik.http.routers.postgres-mcp.middlewares=mcp-no-buffering"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/status"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
       interval: 30s
       timeout: 10s
       retries: 3
